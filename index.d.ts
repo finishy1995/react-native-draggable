@@ -7,6 +7,7 @@ import { GestureResponderEvent, PanResponderGestureState } from 'react-native';
 export interface IDraggableProps {
     /**** props that should probably be removed in favor of "children" */
     renderText?: string;
+    renderTextStyle?: object;
     isCircle?: boolean;
     renderSize?: number;
     imageSource?: number;

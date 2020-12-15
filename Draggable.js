@@ -23,6 +23,7 @@ function clamp(number, min, max) {
 export default function Draggable(props) {
   const {
     renderText,
+    renderTextStyle,
     isCircle,
     renderSize,
     imageSource,
@@ -73,10 +74,10 @@ export default function Draggable(props) {
   }, [x, y]);
 
   const shouldStartDrag = React.useCallback(
-    (gs) => {
-      return !disabled && (Math.abs(gs.dx) > 2 || Math.abs(gs.dy) > 2);
-    },
-    [disabled],
+      (gs) => {
+        return !disabled && (Math.abs(gs.dx) > 2 || Math.abs(gs.dy) > 2);
+      },
+      [disabled],
   );
 
   const reversePosition = React.useCallback(() => {
@@ -90,60 +91,60 @@ export default function Draggable(props) {
   }, [pan]);
 
   const onPanResponderRelease = React.useCallback(
-    (e, gestureState) => {
-      isDragging.current = false;
-      if (onDragRelease) {
-        onDragRelease(e, gestureState, getBounds());
-        onRelease(e, true);
-      }
-      if (!shouldReverse) {
-        pan.current.flattenOffset();
-      } else {
-        reversePosition();
-      }
-    },
-    [onDragRelease, shouldReverse, onRelease, reversePosition, getBounds],
+      (e, gestureState) => {
+        isDragging.current = false;
+        if (onDragRelease) {
+          onDragRelease(e, gestureState, getBounds());
+          onRelease(e, true);
+        }
+        if (!shouldReverse) {
+          pan.current.flattenOffset();
+        } else {
+          reversePosition();
+        }
+      },
+      [onDragRelease, shouldReverse, onRelease, reversePosition, getBounds],
   );
 
   const onPanResponderGrant = React.useCallback(
-    (e, gestureState) => {
-      startBounds.current = getBounds();
-      isDragging.current = true;
-      if (!shouldReverse) {
-        pan.current.setOffset(offsetFromStart.current);
-        pan.current.setValue({x: 0, y: 0});
-      }
-    },
-    [getBounds, shouldReverse],
+      (e, gestureState) => {
+        startBounds.current = getBounds();
+        isDragging.current = true;
+        if (!shouldReverse) {
+          pan.current.setOffset(offsetFromStart.current);
+          pan.current.setValue({x: 0, y: 0});
+        }
+      },
+      [getBounds, shouldReverse],
   );
 
   const handleOnDrag = React.useCallback(
-    (e, gestureState) => {
-      const {dx, dy} = gestureState;
-      const {top, right, left, bottom} = startBounds.current;
-      const far = 999999999;
-      const changeX = clamp(
-        dx,
-        Number.isFinite(minX) ? minX - left : -far,
-        Number.isFinite(maxX) ? maxX - right : far,
-      );
-      const changeY = clamp(
-        dy,
-        Number.isFinite(minY) ? minY - top : -far,
-        Number.isFinite(maxY) ? maxY - bottom : far,
-      );
-      pan.current.setValue({x: changeX, y: changeY});
-      onDrag(e, gestureState);
-    },
-    [maxX, maxY, minX, minY, onDrag],
+      (e, gestureState) => {
+        const {dx, dy} = gestureState;
+        const {top, right, left, bottom} = startBounds.current;
+        const far = 999999999;
+        const changeX = clamp(
+            dx,
+            Number.isFinite(minX) ? minX - left : -far,
+            Number.isFinite(maxX) ? maxX - right : far,
+        );
+        const changeY = clamp(
+            dy,
+            Number.isFinite(minY) ? minY - top : -far,
+            Number.isFinite(maxY) ? maxY - bottom : far,
+        );
+        pan.current.setValue({x: changeX, y: changeY});
+        onDrag(e, gestureState);
+      },
+      [maxX, maxY, minX, minY, onDrag],
   );
 
   const panResponder = React.useMemo(() => {
     return PanResponder.create({
       onMoveShouldSetPanResponder: (_, gestureState) =>
-        shouldStartDrag(gestureState),
+          shouldStartDrag(gestureState),
       onMoveShouldSetPanResponderCapture: (_, gestureState) =>
-        shouldStartDrag(gestureState),
+          shouldStartDrag(gestureState),
       onPanResponderGrant,
       onPanResponderMove: Animated.event([], {
         listener: handleOnDrag,
@@ -164,13 +165,13 @@ export default function Draggable(props) {
     if (!shouldReverse) {
       curPan.addListener((c) => (offsetFromStart.current = c));
     } else {
-        reversePosition();
+      reversePosition();
     }
     return () => {
       curPan.removeAllListeners();
     };
   }, [shouldReverse]);
-  
+
   const positionCss = React.useMemo(() => {
     const Window = Dimensions.get('window');
     return {
@@ -215,11 +216,13 @@ export default function Draggable(props) {
       return children;
     } else if (imageSource) {
       return (
-        <Image
-          style={{width: renderSize, height: renderSize}}
-          source={imageSource}
-        />
+          <Image
+              style={{width: renderSize, height: renderSize}}
+              source={imageSource}
+          />
       );
+    } else if (renderTextStyle) {
+      return <Text style={renderTextStyle}>{renderText}</Text>;
     } else {
       return <Text style={styles.text}>{renderText}</Text>;
     }
@@ -231,13 +234,13 @@ export default function Draggable(props) {
   }, []);
 
   const handlePressOut = React.useCallback(
-    (event) => {
-      onPressOut(event);
-      if (!isDragging.current) {
-        onRelease(event, false);
-      }
-    },
-    [onPressOut, onRelease],
+      (event) => {
+        onPressOut(event);
+        if (!isDragging.current) {
+          onRelease(event, false);
+        }
+      },
+      [onPressOut, onRelease],
   );
 
   const getDebugView = React.useCallback(() => {
@@ -252,34 +255,34 @@ export default function Draggable(props) {
     const top = minY || -far;
     const bottom = maxY ? height - maxY : -far;
     return (
-      <View
-        pointerEvents="box-none"
-        style={{left, right, top, bottom, ...styles.debugView}}
-      />
+        <View
+            pointerEvents="box-none"
+            style={{left, right, top, bottom, ...styles.debugView}}
+        />
     );
   }, [maxX, maxY, minX, minY]);
 
   return (
-    <View pointerEvents="box-none" style={positionCss}>
-      {debug && getDebugView()}
-      <Animated.View
-        pointerEvents="box-none"
-        {...animatedViewProps}
-        {...panResponder.panHandlers}
-        style={pan.current.getLayout()}>
-        <TouchableOpacity
-          {...touchableOpacityProps}
-          onLayout={handleOnLayout}
-          style={dragItemCss}
-          disabled={disabled}
-          onPress={onShortPressRelease}
-          onLongPress={onLongPress}
-          onPressIn={onPressIn}
-          onPressOut={handlePressOut}>
-          {touchableContent}
-        </TouchableOpacity>
-      </Animated.View>
-    </View>
+      <View pointerEvents="box-none" style={positionCss}>
+        {debug && getDebugView()}
+        <Animated.View
+            pointerEvents="box-none"
+            {...animatedViewProps}
+            {...panResponder.panHandlers}
+            style={pan.current.getLayout()}>
+          <TouchableOpacity
+              {...touchableOpacityProps}
+              onLayout={handleOnLayout}
+              style={dragItemCss}
+              disabled={disabled}
+              onPress={onShortPressRelease}
+              onLongPress={onLongPress}
+              onPressIn={onPressIn}
+              onPressOut={handlePressOut}>
+            {touchableContent}
+          </TouchableOpacity>
+        </Animated.View>
+      </View>
   );
 }
 
